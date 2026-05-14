@@ -1,55 +1,166 @@
 # Mr. Bill
 
-A tiny local tool that takes messy bill text (pasted from a renewal email, an account page, whatever) and creates a Basecamp to-do with a due date.
+A small local Node.js tool for interacting with Basecamp (OAuth + bill parsing automation).
 
-Currently Step 1: OAuth authorization only. Main tool coming in Step 2.
+Originally built as a quick internal utility. Over time it was cleaned up for better security and maintainability.
 
-## One-time setup
+---
 
-### 1. Make sure Node is installed
+## Project History & What Changed
 
-In Terminal:
+### Original Setup (Before May 2026)
 
-```
+- Secrets (API keys, tokens) were stored in a local `.env` file and `tokens.json` inside the project folder.
+- Used the `dotenv` package to load environment variables from `.env`.
+- Tokens were read/written directly from a `tokens.json` file in the project root.
+- This worked, but was not ideal from a security or best-practice standpoint.
+
+### Current Setup (May 2026+)
+
+We moved to a cleaner and more secure architecture:
+
+- **No more local `.env` file** in the project.
+- **Client credentials** (Client ID, Client Secret, Account ID, etc.) are now loaded from your shell environment (`~/.zshrc`).
+- **OAuth tokens** are stored in a dedicated location outside the project: `~/.mr-bill/tokens.json`.
+- The `dotenv` package is no longer used.
+- All sensitive data is now either in your shell profile or in `~/.mr-bill/`.
+
+This makes the project safer to share, backup, or hand off to someone else.
+
+---
+
+## Current Architecture
+
+| Secret Type          | Where It's Stored                     | How It's Loaded          |
+|----------------------|---------------------------------------|--------------------------|
+| Client credentials   | `~/.zshrc` (environment variables)    | `process.env`            |
+| OAuth tokens         | `~/.mr-bill/tokens.json`              | Custom `loadTokens()`    |
+| Code                 | `~/Developer/mr-bill/`                | Normal project files     |
+
+---
+
+## Setup Instructions (Clean Way)
+
+### 1. Prerequisites
+
+Make sure you have Node.js installed:
+
+```bash
 node --version
 ```
 
-If you see `v18.x` or higher, you're good. If not, install Node from https://nodejs.org (LTS version).
+You should see v18 or higher.
 
-### 2. Install dependencies
+### 2. Install Dependencies
 
 From inside the `mr-bill` folder:
 
-```
+```bash
 npm install
 ```
 
-This installs one tiny package (`dotenv`) into a `node_modules` folder.
+This installs the required packages (no `dotenv` anymore).
 
-### 3. Fill in your Client Secret
+### 3. Add Your Basecamp Credentials to Your Shell
 
-Open `.env` in any text editor. Two things to change:
+Open your shell configuration file:
 
-- **BASECAMP_CLIENT_SECRET** — paste the Client Secret from your launchpad.37signals.com page (the value next to the Client ID).
-- **USER_AGENT_CONTACT** — put your email address. Basecamp requires this so they can reach you if your integration misbehaves.
-
-Save the file.
-
-### 4. Authorize
-
+```bash
+open ~/.zshrc
 ```
+
+Add the following lines at the bottom (replace the values with your real ones):
+
+```bash
+# === Mr. Bill (Basecamp) Configuration ===
+export BASECAMP_CLIENT_ID="your-client-id"
+export BASECAMP_CLIENT_SECRET="your-client-secret"
+export BASECAMP_ACCOUNT_ID="your-account-id"
+export BASECAMP_PROJECT_ID="your-project-id"
+export USER_AGENT_NAME="Mr. Bill"
+export USER_AGENT_CONTACT="your@email.com"
+export ANTHROPIC_API_KEY="your-anthropic-key"
+```
+
+Save the file, then reload your shell:
+
+```bash
+source ~/.zshrc
+```
+
+### 4. Set Up Your Tokens File
+
+Create the config directory and tokens file:
+
+```bash
+mkdir -p ~/.mr-bill
+touch ~/.mr-bill/tokens.json
+```
+
+The first time you run the authorization flow, the tool will populate this file.
+
+### 5. Run the Authorization Flow
+
+```bash
 npm run authorize
 ```
 
-What happens:
-1. A small local web server starts on port 3737.
-2. Your browser opens to a Basecamp page asking if you want to let "Mr. Bill" access your account.
-3. Click **Yes, I'll allow access**.
-4. You'll see a success page. Close the tab.
-5. Back in Terminal, you'll see "✓ Authorization successful" and a new file `tokens.json` will appear in the folder.
+This will:
+- Open your browser to Basecamp’s OAuth page
+- Let you grant access to “Mr. Bill”
+- Save the resulting access + refresh tokens to `~/.mr-bill/tokens.json`
 
-You're done with Step 1. Do **not** share or commit `tokens.json` — it's already in `.gitignore`.
+You should see a success message.
 
-## What's next
+---
 
-Come back to the chat and tell Claude "authorized." Step 2 adds the actual bill-creation command.
+## How to Use
+
+After setup, you can run the various scripts (e.g. `bill.js`, `test-todo.js`, etc.) directly with Node. The tool will automatically use the credentials from your environment and the tokens from `~/.mr-bill/tokens.json`.
+
+Example:
+
+```bash
+node bill.js
+```
+
+---
+
+## Security Notes
+
+- Never commit `.env`, `tokens.json`, or any file containing real credentials.
+- The `.gitignore` in this project is configured to ignore these files.
+- Keeping secrets in `~/.mr-bill/` (outside the project) makes the repository safe to share or publish.
+- If you ever need to rotate tokens, simply delete `~/.mr-bill/tokens.json` and re-run `npm run authorize`.
+
+---
+
+## Project Structure
+
+```
+mr-bill/
+├── authorize.js          # One-time OAuth flow
+├── basecamp.js           # Shared Basecamp API helpers
+├── bill.js               # Main bill parsing logic
+├── package.json
+├── README.md             # This file
+└── test-todo.js
+```
+
+Secrets live here instead:
+
+```
+~/.mr-bill/
+└── tokens.json
+```
+
+---
+
+## If Something Breaks
+
+1. Make sure your environment variables are set in `~/.zshrc` and that you ran `source ~/.zshrc`.
+2. Check that `~/.mr-bill/tokens.json` exists and contains valid tokens.
+3. Re-run `npm run authorize` if your tokens have expired.
+4. Check the console output — the code has decent error messages for missing credentials.
+
+If you're still stuck, the original planning and thinking behind this tool is documented in the historical `lotflow` repository.

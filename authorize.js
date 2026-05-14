@@ -1,12 +1,13 @@
 // authorize.js
 // One-time OAuth flow. Run this once with `npm run authorize`.
 // Opens your browser, you approve, a local server catches the response,
-// then trades the code for access + refresh tokens and saves them to tokens.json.
+// then trades the code for access + refresh tokens and saves them to ~/.mr-bill/tokens.json.
 
 import http from 'node:http';
 import { exec } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
-import 'dotenv/config';
+import os from 'node:os';
+import path from 'node:path';
 
 const {
   BASECAMP_CLIENT_ID,
@@ -16,14 +17,17 @@ const {
 const REDIRECT_URI = 'http://localhost:3737/callback';
 const PORT = 3737;
 
-// Sanity check: make sure .env was filled in
-if (!BASECAMP_CLIENT_ID || BASECAMP_CLIENT_ID.includes('PASTE')) {
-  console.error('✗ BASECAMP_CLIENT_ID is missing from .env');
+const TOKENS_PATH = path.join(os.homedir(), '.mr-bill', 'tokens.json');
+
+// Sanity check
+if (!BASECAMP_CLIENT_ID) {
+  console.error('✗ BASECAMP_CLIENT_ID is missing from your environment');
+  console.error('  Make sure it is set in your ~/.zshrc and run: source ~/.zshrc');
   process.exit(1);
 }
-if (!BASECAMP_CLIENT_SECRET || BASECAMP_CLIENT_SECRET.includes('PASTE')) {
-  console.error('✗ BASECAMP_CLIENT_SECRET is missing from .env');
-  console.error('  Open .env and paste the Client Secret from your launchpad.37signals.com page.');
+if (!BASECAMP_CLIENT_SECRET) {
+  console.error('✗ BASECAMP_CLIENT_SECRET is missing from your environment');
+  console.error('  Make sure it is set in your ~/.zshrc and run: source ~/.zshrc');
   process.exit(1);
 }
 
@@ -49,8 +53,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Exchange the verification code for an access token.
-  // Basecamp's token endpoint expects params in the URL, POST body empty.
   const tokenUrl =
     'https://launchpad.37signals.com/authorization/token?' +
     `type=web_server&client_id=${BASECAMP_CLIENT_ID}` +
@@ -66,8 +68,7 @@ const server = http.createServer(async (req, res) => {
       throw new Error(data.error || `HTTP ${response.status}`);
     }
 
-    // data has: access_token, refresh_token, expires_in
-    await writeFile('tokens.json', JSON.stringify(data, null, 2));
+    await writeFile(TOKENS_PATH, JSON.stringify(data, null, 2));
 
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(`
@@ -81,7 +82,7 @@ const server = http.createServer(async (req, res) => {
 
     console.log('');
     console.log('✓ Authorization successful.');
-    console.log('  Tokens saved to tokens.json (gitignored, stays on your machine).');
+    console.log(`  Tokens saved to ${TOKENS_PATH}`);
     console.log('');
 
     setTimeout(() => {
@@ -99,15 +100,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
   console.log('Opening your browser to authorize Mr. Bill...');
-  console.log('');
-
-  exec(`open "${authUrl}"`, (err) => {
-    if (err) {
-      console.log('Could not open browser automatically.');
-      console.log('Paste this URL into your browser:');
-      console.log('');
-      console.log(authUrl);
-      console.log('');
-    }
-  });
+  exec(`open "${authUrl}"`);
 });

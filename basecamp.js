@@ -4,6 +4,8 @@
 // and finds/creates the to-do list for you.
 
 import { readFile, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
 const {
   BASECAMP_CLIENT_ID,
@@ -16,12 +18,15 @@ const {
 
 const API_BASE = `https://3.basecampapi.com/${BASECAMP_ACCOUNT_ID}`;
 
+// === NEW: Tokens now live in ~/.mr-bill/tokens.json ===
+const TOKENS_PATH = path.join(os.homedir(), '.mr-bill', 'tokens.json');
+
 async function loadTokens() {
-  return JSON.parse(await readFile('tokens.json', 'utf8'));
+  return JSON.parse(await readFile(TOKENS_PATH, 'utf8'));
 }
 
 async function saveTokens(tokens) {
-  await writeFile('tokens.json', JSON.stringify(tokens, null, 2));
+  await writeFile(TOKENS_PATH, JSON.stringify(tokens, null, 2));
 }
 
 // Access tokens expire after 2 weeks. If we get a 401, swap to the refresh flow.
@@ -48,84 +53,29 @@ async function refreshAccessToken() {
 // Make an authenticated Basecamp API request.
 // `path` can be a relative path like `/projects/123.json` or a full URL.
 export async function bcFetch(path, options = {}) {
-  const { access_token } = await loadTokens();
+  let tokens = await loadTokens();
+  let accessToken = tokens.access_token;
 
-  const doRequest = async (token) => {
-    const url = path.startsWith('http') ? path : `${API_BASE}${path}`;
-    return fetch(url, {
-      ...options,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'User-Agent': `${USER_AGENT_NAME} (${USER_AGENT_CONTACT})`,
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-      },
-    });
+  const headers = {
+    'Authorization': `Bearer ${accessToken}`,
+    'User-Agent': `${USER_AGENT_NAME} (${USER_AGENT_CONTACT})`,
+    ...options.headers,
   };
 
-  let res = await doRequest(access_token);
+  let res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
 
+  // If token expired, refresh and retry once
   if (res.status === 401) {
-    // Expired token — refresh once and retry.
-    const newToken = await refreshAccessToken();
-    res = await doRequest(newToken);
+    accessToken = await refreshAccessToken();
+    headers['Authorization'] = `Bearer ${accessToken}`;
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    });
   }
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Basecamp API ${res.status}: ${body.slice(0, 300)}`);
-  }
-
-  if (res.status === 204) return null; // No Content
-  return res.json();
-}
-
-// Find (or create) a to-do list by name in the configured project.
-// Returns the list ID.
-export async function ensureTodoList(listName) {
-  const project = await bcFetch(`/projects/${BASECAMP_PROJECT_ID}.json`);
-
-  const todoset = project.dock.find((tool) => tool.name === 'todoset');
-  if (!todoset) {
-    throw new Error(
-      'No to-do set found on this project. Is BASECAMP_PROJECT_ID correct?'
-    );
-  }
-  if (!todoset.enabled) {
-    throw new Error(
-      'The To-dos tool is disabled on this project. Enable it in Basecamp first.'
-    );
-  }
-
-  const lists = await bcFetch(
-    `/buckets/${BASECAMP_PROJECT_ID}/todosets/${todoset.id}/todolists.json`
-  );
-
-  const existing = lists.find((l) => l.name === listName);
-  if (existing) return existing.id;
-
-  console.log(`  No list named "${listName}" found — creating it.`);
-  const created = await bcFetch(
-    `/buckets/${BASECAMP_PROJECT_ID}/todosets/${todoset.id}/todolists.json`,
-    {
-      method: 'POST',
-      body: JSON.stringify({ name: listName }),
-    }
-  );
-  return created.id;
-}
-
-// Create a to-do in the given list. Returns the created to-do object.
-export async function createTodo(todolistId, { content, description, dueOn }) {
-  return bcFetch(
-    `/buckets/${BASECAMP_PROJECT_ID}/todolists/${todolistId}/todos.json`,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        content,
-        description: description || '',
-        due_on: dueOn || null,
-      }),
-    }
-  );
+  return res;
 }
