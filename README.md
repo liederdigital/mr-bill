@@ -139,6 +139,7 @@ mr-bill/
 ├── package.json
 ├── README.md             # This file
 ├── COLOPHON.md           # How this repository was made
+├── AGENTS.md             # Instructions for AI coding agents
 └── test-todo.js          # Optional live Basecamp plumbing check
 ```
 
@@ -161,4 +162,6 @@ Secrets live here instead:
 
 ## License
 
-No license has been chosen for this project yet. Making the repository public does not grant permission to use, copy, modify, or distribute the code; those rights require an explicit license from the owner.
+Copyright (c) 2026 Lieder Digital. All rights reserved. This repository is public for viewing only; no permission is granted to use, copy, modify, or distribute this code.
+
+How this repository was made is recorded in [COLOPHON.md](COLOPHON.md).
