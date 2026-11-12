@@ -1,22 +1,31 @@
 // bill.js
 // Copy bill text to your clipboard, run this script, get a Basecamp to-do.
 //
+// The pasted bill text is sent to Anthropic to extract vendor, amount, and
+// due date, and is also copied into the resulting Basecamp to-do description.
+// Nothing else is transmitted, logged, or stored beyond that.
+//
 // Usage:
 //   1. Select & copy the bill text (renewal page, email, whatever)
 //   2. Run: node bill.js
 //   3. Review the preview, hit `y` to create the to-do.
 
-import 'dotenv/config';
 import Anthropic from '@anthropic-ai/sdk';
 import readline from 'node:readline';
 import { execSync } from 'node:child_process';
 import { ensureTodoList, createTodo } from './basecamp.js';
+import {
+  buildTodoFromParsed,
+  formatAmount,
+  parseModelOutput,
+  validateParsedBill,
+} from './lib/bill-parse.js';
 
 const { ANTHROPIC_API_KEY } = process.env;
 
-if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY.includes('PASTE')) {
-  console.error('✗ ANTHROPIC_API_KEY is missing from .env');
-  console.error('  Add ANTHROPIC_API_KEY=sk-ant-api03-... to your .env file.');
+if (!ANTHROPIC_API_KEY) {
+  console.error('✗ ANTHROPIC_API_KEY is missing from your environment');
+  console.error('  Set it in your shell environment and try again.');
   process.exit(1);
 }
 
@@ -55,17 +64,11 @@ TEXT_PLACEHOLDER
 function readClipboard() {
   try {
     return execSync('pbpaste', { encoding: 'utf8' }).trim();
-  } catch (err) {
+  } catch {
     throw new Error(
       'Could not read from clipboard (pbpaste failed). Are you on a Mac?'
     );
   }
-}
-
-function formatAmount(amount, currency) {
-  if (amount == null) return '(unknown)';
-  const sym = currency === 'USD' ? '$' : `${currency} `;
-  return `${sym}${amount.toFixed(2)}`;
 }
 
 function prompt(question) {
@@ -94,19 +97,11 @@ async function parseBill(text) {
   });
 
   const textBlock = response.content.find((b) => b.type === 'text');
-  if (!textBlock) throw new Error('No text response from Claude');
-
-  let raw = textBlock.text.trim();
-  // Strip code fences if Claude wraps the JSON despite the instructions.
-  raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
-
-  try {
-    return JSON.parse(raw);
-  } catch (err) {
-    throw new Error(
-      `Could not parse Claude's response as JSON.\nRaw response:\n${raw}`
-    );
+  if (!textBlock) {
+    throw new Error('No text response from the model');
   }
+
+  return parseModelOutput(textBlock.text);
 }
 
 // ---------------------------------------------------------------------------
@@ -122,25 +117,37 @@ async function main() {
   console.log(`  Got ${text.length} characters.`);
 
   console.log('→ Parsing with Claude...');
-  const parsed = await parseBill(text);
+  let parsed = await parseBill(text);
 
   // Ask for missing fields interactively so the to-do isn't useless.
+  // Prompts cannot by themselves trigger a Basecamp write.
   if (!parsed.vendor) {
     const vendor = await prompt('  No vendor detected. Enter company name (or Enter to skip): ');
-    if (vendor) parsed.vendor = vendor;
+    if (vendor) {
+      try {
+        parsed = validateParsedBill({ ...parsed, vendor });
+      } catch (err) {
+        console.log(`  (Ignoring vendor — ${err.message})`);
+      }
+    }
   }
 
   if (!parsed.due_date) {
     const date = await prompt('  No due date detected. Enter YYYY-MM-DD (or Enter to skip): ');
-    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      parsed.due_date = date;
-    } else if (date) {
-      console.log('  (Ignoring — not a valid YYYY-MM-DD date)');
+    if (date) {
+      try {
+        parsed = validateParsedBill({ ...parsed, due_date: date });
+      } catch {
+        console.log('  (Ignoring — not a valid YYYY-MM-DD date)');
+      }
     }
   }
 
-  // Preview
-  const amountStr = formatAmount(parsed.amount, parsed.currency || 'USD');
+  // Final validation before preview or any API call.
+  parsed = validateParsedBill(parsed);
+  const todoFields = buildTodoFromParsed(parsed, text);
+
+  const amountStr = formatAmount(parsed.amount, parsed.currency);
   console.log('');
   console.log('─────────────────────────────────────');
   console.log(`  Vendor:   ${parsed.vendor || '(unknown)'}`);
@@ -160,24 +167,8 @@ async function main() {
   console.log('→ Finding "Bills" list...');
   const listId = await ensureTodoList('Bills');
 
-  const title = parsed.vendor
-    ? `${parsed.vendor} — ${amountStr}`
-    : `Bill — ${amountStr}`;
-
-  const description = [
-    parsed.summary || '',
-    '',
-    '---',
-    'Source text:',
-    text,
-  ].join('\n');
-
   console.log('→ Creating to-do...');
-  const todo = await createTodo(listId, {
-    content: title,
-    description,
-    dueOn: parsed.due_date,
-  });
+  const todo = await createTodo(listId, todoFields);
 
   console.log('');
   console.log('✓ To-do created!');

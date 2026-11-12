@@ -1,8 +1,10 @@
 // test-todo.js
 // Plumbing check. Creates one hardcoded to-do in your Bills project
 // to prove the API auth + write path works. Run with: node test-todo.js
+//
+// This talks to the real Basecamp API and will create a to-do. It is not
+// part of `npm test`.
 
-import 'dotenv/config';
 import { ensureTodoList, createTodo } from './basecamp.js';
 
 function isoDaysFromNow(days) {
