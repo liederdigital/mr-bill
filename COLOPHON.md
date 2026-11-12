@@ -13,9 +13,9 @@ elsewhere.
 | Surface | Unknown for the original tool. The November 2026 hardening was coordinated through the Grok Bot Mac app and ran on the Grok Bot box |
 | Model / mode | Unknown for the original build; not recorded for the November 2026 hardening. (At runtime, `bill.js` calls `claude-haiku-4-5-20251001` to parse bills. That is a model the tool uses, configured in code, not evidence of what built the tool) |
 | Editor | Unknown |
-| Review | Unknown for the original work. Pull request #2 is for Human review and merge by Ron Stauffer (not yet merged at the time of this update) |
+| Review | Unknown for the original work. [PR #2](https://github.com/liederdigital/mr-bill/pull/2) was reviewed and merged by Ron Stauffer on 2026-11-12 (Human; merge commit `3265b9c`). Review of the documentation follow-up after that merge is pending |
 | Directed by | Ron Stauffer (Owner-confirmed for the November 2026 public-release work; earlier direction is known only from his Git identity on the 2026 commits) |
-| Human owner | Ron Stauffer; directed the November 2026 public-release review and documentation follow-up (Owner-confirmed). His role on the April and May 2026 commits, beyond the Git identity, is not recorded |
+| Human owner | Ron Stauffer; directed the November 2026 public-release review and documentation follow-up (Owner-confirmed), and merged PR #2. His role on the April and May 2026 commits, beyond the Git identity, is not recorded |
 | Era | 2026-04-21 to 2026-11-12 (dates as recorded in the commits, UTC−07:00) |
 | Status | Active; being prepared for a public, view-only release |
 
@@ -34,15 +34,19 @@ On November 5, 2026, Claude Code reconstructed this colophon in forensic mode
 review (Owner-confirmed). The Security Guard · CISO bot, coordinated through
 the Grok Bot Mac app, did that hardening on the Grok Bot box, committed as
 Security Guard <security@lieder.bot> using the GitHub CLI as
-security-guard-lieder, and opened [pull request #2](https://github.com/liederdigital/mr-bill/pull/2)
-for Ron to review and merge.
+security-guard-lieder, and opened [pull request #2](https://github.com/liederdigital/mr-bill/pull/2).
+Ron merged PR #2 at 13:42 MST (merge commit `3265b9c`). A few minutes later, at
+Ron's request, the same builder added the view-only copyright notice,
+`AGENTS.md`, and this colophon update, as a follow-up for Ron to review and
+merge.
 
 ## Builder history (newest first)
 
 | Date | Builder | Role | Surface | Model / mode | Contribution | Evidence |
 |---|---|---|---|---|---|---|
-| 2026-11-12 | Security Guard · CISO (Grok Bot) | Built | Grok Bot Mac app; work ran on the Grok Bot box; GitHub via the `gh` CLI as security-guard-lieder | not recorded | Public-release hardening: OAuth `state` and loopback callback, token exchange in a POST body, token-file permissions, model-output validation, restoration of `ensureTodoList` and `createTodo`, removal of `dotenv`, unit tests, README privacy and view-only copyright notice, `AGENTS.md`, and this colophon update. Opened [PR #2](https://github.com/liederdigital/mr-bill/pull/2). Ron Stauffer reviews and merges | Observed in this session; branch `security/public-release-hardening`; commits as Security Guard <security@lieder.bot>; Owner-confirmed (Ron asked for the review and this documentation follow-up) |
-| 2026-11-12 | Ron Stauffer (Git identity) | Approved | Unknown (GitHub merge of PR #1) | Unknown | Merged [PR #1](https://github.com/liederdigital/mr-bill/pull/1) (COLOPHON.md forensic reconstruction) | Merge commit `e501485` |
+| 2026-11-12 | Security Guard · CISO (Grok Bot) | Built | Grok Bot Mac app; work ran on the Grok Bot box; GitHub via the `gh` CLI as security-guard-lieder | not recorded | Public-release hardening (OAuth `state` and loopback callback, token exchange in a POST body, token-file permissions, model-output validation, restoration of `ensureTodoList` and `createTodo`, removal of `dotenv`, unit tests, README privacy) in [PR #2](https://github.com/liederdigital/mr-bill/pull/2), now merged. After that merge, at Ron's request: view-only copyright notice (no LICENSE file), `AGENTS.md`, and this colophon update | Observed in this session; branch `security/public-release-hardening`; commits as Security Guard <security@lieder.bot>, including `2a7ac2a` (hardening, in PR #2) and the documentation follow-up; Owner-confirmed (Ron asked for the review and this documentation follow-up) |
+| 2026-11-12 | Ron Stauffer (Git identity) | Approved | GitHub merge of PR #2 | Unknown | Merged [PR #2](https://github.com/liederdigital/mr-bill/pull/2) (public-release hardening) at 13:42 MST | Merge commit `3265b9c`; merged by `ronstauffer` |
+| 2026-11-12 | Ron Stauffer (Git identity) | Approved | GitHub merge of PR #1 | Unknown | Merged [PR #1](https://github.com/liederdigital/mr-bill/pull/1) (COLOPHON.md forensic reconstruction) | Merge commit `e501485` |
 | 2026-11-05 | Claude Code | Documented | Cloud session | Claude Opus 5.5 (configured for the session; the serving model was not independently verified) | Reconstructed this colophon from the repository; no code changed | Observed in session; `git log -- COLOPHON.md` |
 | 2026-05-14 | Unknown; committed by Ron Stauffer's Git identity | Built | Unknown | Unknown | Security and maintainability refactor: secrets moved to the shell environment and `~/.mr-bill/tokens.json`, README rewritten, version 0.2.0 | Commit `9e49467` |
 | 2026-04-21 | Unknown; committed by Ron Stauffer's Git identity | Built | Unknown | Unknown | Initial commit: OAuth authorization, Basecamp helpers, bill parser, test to-do script | Commit `9dcb74f` |
@@ -51,21 +55,22 @@ for Ron to review and merge.
 
 - This file follows COLOPHON.md instructions version 1.1.2. The November 5
   entry was written in forensic mode. The November 12 rows were written in
-  proactive mode in the same pull request as the work they describe.
+  proactive mode in the same branch as the work they describe.
 - The November 5 reconstruction inspected the history as it then stood (two
   commits, one branch of work), commit messages and diffs, `README.md`,
   `package.json`, `.gitignore`, and the source files. Neither of those commits
   has a `Co-Authored-By` or other AI trailer. A missing trailer does not prove
   a person wrote the change alone. That account is left unchanged.
 - As of November 12, 2026, history also includes the COLOPHON commit
-  (`b9cc96a`), the merge of PR #1 (`e501485`), and the public-release
-  hardening on `security/public-release-hardening` (PR #2). This update
-  corrects the earlier "two commits" description, which was accurate on
-  November 5 and is not a complete description of the repository now.
+  (`b9cc96a`), the merge of PR #1 (`e501485`), the public-release hardening
+  (`2a7ac2a`) and its merge (`3265b9c`), and this documentation follow-up.
+  This update corrects the earlier "two commits" description, which was
+  accurate on November 5 and is not a complete description of the repository
+  now.
 - The November 5 reconstruction recorded that there was no `CLAUDE.md`,
   `AGENTS.md`, `.cursor/` folder, `CREDITS.md`, or other AI config or
-  provenance file. `AGENTS.md` was added on November 12 in PR #2; the earlier
-  statement remains true of the tree as of November 5.
+  provenance file. `AGENTS.md` was added on November 12 after PR #2 merged;
+  the earlier statement remains true of the tree as of November 5.
 - A commit's author is the Git identity that made the commit, not necessarily
   the person or tool that wrote the change. The builders of the April and May
   2026 commits are therefore still Unknown.
@@ -80,6 +85,8 @@ for Ron to review and merge.
 - The model used for the November 2026 Security Guard work is not recorded.
   No underlying model name was shown by the tool, found in a config file, or
   confirmed by the owner, and none is invented here.
-- PR #2 had not been reviewed or merged at the time of this update. That Ron
-  reviews and merges is Owner-confirmed as the intended process, not a record
-  that the review has already happened.
+- An earlier draft of this update said PR #2 had not yet been merged. A check
+  of `origin/main` found that Ron Stauffer had already merged it at 13:42 MST
+  (merge commit `3265b9c`), a few minutes before the documentation follow-up
+  was committed. That wording is corrected here. Review of the follow-up
+  itself is still pending.
