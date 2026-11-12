@@ -1,16 +1,16 @@
 {
   "name": "mr-bill",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Paste bill text, get a Basecamp to-do with vendor/amount/due date",
   "type": "module",
   "scripts": {
     "authorize": "node authorize.js",
     "test-todo": "node test-todo.js",
-    "bill": "node bill.js"
+    "bill": "node bill.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.90.0",
-    "dotenv": "^16.4.5"
+    "@anthropic-ai/sdk": "^0.91.1"
   },
   "engines": {
     "node": ">=18"

@@ -1,4 +1,6 @@
 node_modules/
 .env
+.env.*
 tokens.json
+.mr-bill/
 .DS_Store
