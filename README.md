@@ -165,3 +165,5 @@ Secrets live here instead:
 Copyright (c) 2026 Lieder Digital. All rights reserved. This repository is public for viewing only; no permission is granted to use, copy, modify, or distribute this code.
 
 How this repository was made is recorded in [COLOPHON.md](COLOPHON.md).
+
+<a href="https://colophon.md/timeline?repo=liederdigital/mr-bill"><picture><source media="(prefers-color-scheme: dark)" srcset="https://colophon.md/svg/liederdigital/mr-bill?theme=dark"><source media="(prefers-color-scheme: light)" srcset="https://colophon.md/svg/liederdigital/mr-bill"><img alt="Timeline of how Mr. Bill was made" src="https://colophon.md/svg/liederdigital/mr-bill"></picture></a>
