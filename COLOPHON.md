@@ -4,20 +4,23 @@ How this repository was made: which tools did the work, where they ran, what
 each contributed, and who directed it. License and third-party notices live
 elsewhere.
 
+<a href="https://colophon.md/timeline?repo=liederdigital/mr-bill"><picture><source media="(prefers-color-scheme: dark)" srcset="https://colophon.md/svg/liederdigital/mr-bill?theme=dark"><source media="(prefers-color-scheme: light)" srcset="https://colophon.md/svg/liederdigital/mr-bill"><img alt="Timeline of how Mr. Bill was made" src="https://colophon.md/svg/liederdigital/mr-bill"></picture></a>
+
 ## Snapshot
 
 | | |
 |---|---|
 | Project | Mr. Bill: a small local Node.js tool that turns pasted bill text into a Basecamp to-do |
+| Convention | [COLOPHON.md](https://colophon.md) v1.2.4 |
 | Primary builder | Unknown for the original tool. The November 2026 public-release hardening was built by the Security Guard · CISO bot (Grok Bot) |
 | Surface | Unknown for the original tool. The November 2026 hardening was coordinated through the Grok Bot Mac app and ran on the Grok Bot box |
 | Model / mode | Unknown for the original build; not recorded for the November 2026 hardening. (At runtime, `bill.js` calls `claude-haiku-4-5-20251001` to parse bills. That is a model the tool uses, configured in code, not evidence of what built the tool) |
 | Editor | Unknown |
-| Review | Unknown for the original work. [PR #2](https://github.com/liederdigital/mr-bill/pull/2) was reviewed and merged by Ron Stauffer on 2026-11-12 (Human; merge commit `3265b9c`). Review of the documentation follow-up after that merge is pending |
+| Review | Unknown for the original work. [PR #2](https://github.com/liederdigital/mr-bill/pull/2) was reviewed and merged by Ron Stauffer on 2026-11-12 (Human; merge commit `3265b9c`). Review of the documentation follow-up after that merge is pending. Update 2026-11-21: Ron Stauffer merged that follow-up as [PR #3](https://github.com/liederdigital/mr-bill/pull/3) on 2026-11-12 (Human; merge commit `caa47cb`) |
 | Directed by | Ron Stauffer (Owner-confirmed for the November 2026 public-release work; earlier direction is known only from his Git identity on the 2026 commits) |
 | Human owner | Ron Stauffer; directed the November 2026 public-release review and documentation follow-up (Owner-confirmed), and merged PR #2. His role on the April and May 2026 commits, beyond the Git identity, is not recorded |
-| Era | 2026-04-21 to 2026-11-12 (dates as recorded in the commits, UTC−07:00) |
-| Status | Active; being prepared for a public, view-only release |
+| Era | 2026-04-21 to 2026-11-21 (UTC) |
+| Status | Active; being prepared for a public, view-only release. The repository was public, view-only, as of 2026-11-21 (Observed) |
 
 ## How the work was done
 
@@ -42,8 +45,12 @@ merge.
 
 ## Builder history (newest first)
 
+Dates are UTC.
+
 | Date | Builder | Role | Surface | Model / mode | Contribution | Evidence |
 |---|---|---|---|---|---|---|
+| 2026-11-21 | Grok Bot | Documented | Hosted agent running `git` and `gh` on the owner's MacBook Pro | Unknown | Upgraded this colophon to COLOPHON.md v1.2.4: `Convention` row, UTC dates, live timeline, history caught up from GitHub; confirmed `AGENTS.md` already has the current Colophon snippet | `git log -- COLOPHON.md` |
+| 2026-11-12 | Ron Stauffer (Git identity) | Approved | GitHub merge of PR #3 | Unknown | Merged [PR #3](https://github.com/liederdigital/mr-bill/pull/3) (view-only copyright notice, `AGENTS.md`, colophon update, and its correction) | Merge commit `caa47cb`; merged by `ronstauffer` |
 | 2026-11-12 | Security Guard · CISO (Grok Bot) | Built | Grok Bot Mac app; work ran on the Grok Bot box; GitHub via the `gh` CLI as security-guard-lieder | not recorded | Public-release hardening (OAuth `state` and loopback callback, token exchange in a POST body, token-file permissions, model-output validation, restoration of `ensureTodoList` and `createTodo`, removal of `dotenv`, unit tests, README privacy) in [PR #2](https://github.com/liederdigital/mr-bill/pull/2), now merged. After that merge, at Ron's request: view-only copyright notice (no LICENSE file), `AGENTS.md`, and this colophon update | Observed in this session; branch `security/public-release-hardening`; commits as Security Guard <security@lieder.bot>, including `2a7ac2a` (hardening, in PR #2) and the documentation follow-up; Owner-confirmed (Ron asked for the review and this documentation follow-up) |
 | 2026-11-12 | Ron Stauffer (Git identity) | Approved | GitHub merge of PR #2 | Unknown | Merged [PR #2](https://github.com/liederdigital/mr-bill/pull/2) (public-release hardening) at 13:42 MST | Merge commit `3265b9c`; merged by `ronstauffer` |
 | 2026-11-12 | Ron Stauffer (Git identity) | Approved | GitHub merge of PR #1 | Unknown | Merged [PR #1](https://github.com/liederdigital/mr-bill/pull/1) (COLOPHON.md forensic reconstruction) | Merge commit `e501485` |
@@ -53,7 +60,9 @@ merge.
 
 ## Evidence limits
 
-- This file follows COLOPHON.md instructions version 1.1.2. The November 5
+- This file originally followed COLOPHON.md instructions version 1.1.2. It was
+  upgraded to v1.2.4 on 2026-11-21; the version now lives in the Snapshot
+  `Convention` row. The November 5
   entry was written in forensic mode. The November 12 rows were written in
   proactive mode in the same branch as the work they describe.
 - The November 5 reconstruction inspected the history as it then stood (two
@@ -90,3 +99,13 @@ merge.
   (merge commit `3265b9c`), a few minutes before the documentation follow-up
   was committed. That wording is corrected here. Review of the follow-up
   itself is still pending.
+- 2026-11-21 upgrade: checked GitHub history only (commits, trailers, pull
+  requests, tags, and releases) since the newest row. It found one unrecorded
+  event, the merge of PR #3 (`caa47cb`, 2026-11-12 20:47 UTC), added above.
+  PR #3 also carried `fffbea5` and `055aee1`, which the Security Guard row
+  already describes. There are no tags or releases. Local session logs were
+  not checked.
+- Time zones: dates are now UTC. The Era was recorded in UTC−07:00. Every
+  commit date is the same in UTC (2026-04-21 20:34, 2026-05-14 23:12,
+  2026-11-05 06:42, and 2026-11-12 20:09 to 20:47), so no row dates changed.
+  The prose times "13:42 MST" above are 20:42 UTC and are left as written.
